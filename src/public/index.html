@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Solicitudes y Tickets TI</title>
+  <meta name="description" content="Gestión y ciclo de vida de solicitudes de soporte técnico con auditoría de cambios.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Header / Top Bar Contract -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-zone">
+        <a href="/" class="brand-link">
+          <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="2" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+          <span class="brand-name">Sistema de Solicitudes</span>
+        </a>
+      </div>
+
+      <nav class="nav-links">
+        <a href="#modulo-registro" class="nav-link">Nueva Solicitud</a>
+        <a href="#modulo-consulta" class="nav-link">Consultar Ticket</a>
+        <a href="#modulo-gestion" class="nav-link">Gestión de Estado</a>
+        <a href="#modulo-listado" class="nav-link">Tablero</a>
+      </nav>
+
+      <div class="topbar-action">
+        <button id="btn-nuevo-scroll" class="btn btn-primary btn-sm">Crear Ticket</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal -->
+  <main class="main-container">
+    <!-- Banner de Notificación Global (Éxito / Error) -->
+    <div id="global-alert" class="alert-banner" role="alert" hidden>
+      <div class="alert-content">
+        <span id="alert-icon" class="alert-icon"></span>
+        <div class="alert-texts">
+          <strong id="alert-title" class="alert-title"></strong>
+          <p id="alert-message" class="alert-message"></p>
+          <ul id="alert-details" class="alert-details" hidden></ul>
+        </div>
+      </div>
+      <button id="btn-cerrar-alerta" class="alert-close" aria-label="Cerrar notificación">&times;</button>
+    </div>
+
+    <!-- Modal de Registro Exitoso -->
+    <div id="modal-exito" class="modal-backdrop" hidden>
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-badge-success">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <h2 class="modal-title">¡Solicitud Registrada con Éxito!</h2>
+          <p class="modal-subtitle">Se ha creado el ticket en el sistema con estado inicial <strong class="badge-status badge-registrada">Registrada</strong>.</p>
+        </div>
+        <div class="modal-body">
+          <label class="modal-label">Código único de seguimiento:</label>
+          <div class="code-box">
+            <code id="modal-codigo" class="ticket-code-display">REQ-XXXXXX</code>
+            <button id="btn-copiar-codigo" class="btn btn-secondary btn-copy" title="Copiar código al portapapeles">
+              <span id="btn-copiar-text">Copiar</span>
+            </button>
+          </div>
+          <p class="code-helper">Guarde este código para consultar el avance o actualizar el estado del servicio.</p>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-ver-ticket-modal" class="btn btn-primary">Ver Detalle del Ticket</button>
+          <button id="btn-cerrar-modal" class="btn btn-secondary">Cerrar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Grid de Módulos Operativos -->
+    <div class="modules-grid">
+      
+      <!-- 1. MÓDULO DE REGISTRO -->
+      <section id="modulo-registro" class="card-panel">
+        <div class="panel-header">
+          <div class="panel-header-text">
+            <span class="panel-kicker">Módulo 01</span>
+            <h2 class="panel-title">Registro de Solicitud</h2>
+          </div>
+          <span class="panel-badge">Nuevo Ticket</span>
+        </div>
+        <p class="panel-description">Complete los datos obligatorios para generar una orden de soporte técnico con código único alfanumérico.</p>
+
+        <form id="form-registro" class="panel-form" novalidate>
+          <div class="form-group">
+            <label for="reg-solicitante" class="form-label">Nombre del Solicitante <span class="required">*</span></label>
+            <input type="text" id="reg-solicitante" name="solicitante" class="form-input" placeholder="Ej. Alexander Gutierrez" required>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="reg-categoria" class="form-label">Categoría <span class="required">*</span></label>
+              <select id="reg-categoria" name="categoria" class="form-select" required>
+                <option value="">Seleccione categoría...</option>
+                <option value="Hardware">Hardware (Equipos, periféricos)</option>
+                <option value="Software">Software (Sistemas, licencias)</option>
+                <option value="Redes">Redes (Conectividad, VPN, Wi-Fi)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="reg-prioridad" class="form-label">Prioridad <span class="required">*</span></label>
+              <select id="reg-prioridad" name="prioridad" class="form-select" required>
+                <option value="">Seleccione prioridad...</option>
+                <option value="Baja">Baja</option>
+                <option value="Media">Media</option>
+                <option value="Alta">Alta</option>
+                <option value="Crítica">Crítica</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-descripcion" class="form-label">Descripción Detallada <span class="required">*</span></label>
+            <textarea id="reg-descripcion" name="descripcion" rows="4" class="form-textarea" placeholder="Describa el fallo o necesidad con el mayor detalle posible..." required></textarea>
+          </div>
+
+          <div class="form-info-box">
+            <svg class="info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="16" x2="12" y2="12" />
+              <line x1="12" y1="8" x2="12.01" y2="8" />
+            </svg>
+            <span>El ticket se registra inicialmente con estado <strong>Registrada</strong> y sin técnico asignado.</span>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" id="btn-enviar-registro" class="btn btn-primary btn-full">
+              Registrar Solicitud
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- 2. MÓDULO DE CONSULTA -->
+      <section id="modulo-consulta" class="card-panel">
+        <div class="panel-header">
+          <div class="panel-header-text">
+            <span class="panel-kicker">Módulo 02</span>
+            <h2 class="panel-title">Consulta de Solicitud</h2>
+          </div>
+          <span class="panel-badge">Búsqueda</span>
+        </div>
+        <p class="panel-description">Ingrese el código de la solicitud (formato REQ-XXXXXX) para verificar su estado actual e historial de auditoría.</p>
+
+        <form id="form-consulta" class="search-form">
+          <div class="search-input-group">
+            <input type="text" id="input-buscar-codigo" class="form-input search-input" placeholder="REQ-7X9K2A" maxlength="15" autocomplete="off">
+            <button type="submit" id="btn-buscar" class="btn btn-primary search-btn">Consultar</button>
+          </div>
+        </form>
+
+        <!-- Estado Vacío Inicial -->
+        <div id="consulta-empty" class="state-empty">
+          <div class="empty-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <h3 class="empty-title">Sin solicitud seleccionada</h3>
+          <p class="empty-text">Realice una búsqueda por código o seleccione una solicitud del tablero inferior para inspeccionar sus datos y auditoría.</p>
+        </div>
+
+        <!-- Tarjeta de Resultado de la Solicitud -->
+        <div id="consulta-resultado" class="ticket-result" hidden>
+          <div class="ticket-header-strip">
+            <div class="ticket-code-group">
+              <span class="meta-label">CÓDIGO</span>
+              <span id="ticket-view-codigo" class="ticket-code-value">REQ-000000</span>
+            </div>
+            <div class="ticket-badges-group">
+              <span id="ticket-view-estado" class="badge-status badge-registrada">Registrada</span>
+              <span id="ticket-view-prioridad" class="badge-priority">Alta</span>
+            </div>
+          </div>
+
+          <div class="ticket-details-grid">
+            <div class="detail-item">
+              <span class="detail-label">Solicitante:</span>
+              <strong id="ticket-view-solicitante" class="detail-value">-</strong>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Categoría:</span>
+              <strong id="ticket-view-categoria" class="detail-value">-</strong>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Técnico Asignado:</span>
+              <strong id="ticket-view-tecnico" class="detail-value text-muted">Sin asignar</strong>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Fecha Creación:</span>
+              <span id="ticket-view-fecha-creacion" class="detail-value font-mono">-</span>
+            </div>
+            <div class="detail-item full-width">
+              <span class="detail-label">Última Actualización:</span>
+              <span id="ticket-view-fecha-actualizacion" class="detail-value font-mono">-</span>
+            </div>
+            <div class="detail-item full-width">
+              <span class="detail-label">Descripción:</span>
+              <p id="ticket-view-descripcion" class="detail-description">-</p>
+            </div>
+          </div>
+
+          <!-- Línea de Tiempo / Historial de Auditoría -->
+          <div class="timeline-section">
+            <h4 class="timeline-heading">Historial Cronológico de Cambios</h4>
+            <div id="timeline-list" class="timeline-list">
+              <!-- Renderizado dinámico -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- 3. MÓDULO DE GESTIÓN DE ESTADO -->
+    <section id="modulo-gestion" class="card-panel mt-6">
+      <div class="panel-header">
+        <div class="panel-header-text">
+          <span class="panel-kicker">Módulo 03</span>
+          <h2 class="panel-title">Gestión de Estado y Asignación Técnica</h2>
+        </div>
+        <span id="gestion-indicator" class="panel-badge badge-disabled">Esperando Consulta</span>
+      </div>
+      <p class="panel-description">Actualice el ciclo de vida del ticket actualmente consultado. Al avanzar a estados técnicos, es obligatorio asignar un profesional responsable.</p>
+
+      <form id="form-gestion" class="panel-form" novalidate>
+        <div class="ticket-loaded-summary" id="gestion-ticket-summary">
+          <span class="summary-prefix">Ticket activo:</span>
+          <strong id="gestion-summary-code" class="summary-code">Ninguno seleccionado</strong>
+          <span class="separator">·</span>
+          <span id="gestion-summary-state" class="summary-state">Consulte una solicitud arriba</span>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="gest-nuevo-estado" class="form-label">Siguiente Estado <span class="required">*</span></label>
+            <select id="gest-nuevo-estado" name="nuevoEstado" class="form-select" disabled required>
+              <option value="">Seleccione el nuevo estado...</option>
+              <option value="Asignada">Asignada (Requiere técnico)</option>
+              <option value="En Proceso">En Proceso (Requiere técnico)</option>
+              <option value="Resuelta">Resuelta (Requiere técnico)</option>
+              <option value="Cancelada">Cancelada</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="gest-tecnico" class="form-label">
+              Técnico Responsable 
+              <span id="tecnico-required-mark" class="required" hidden>*</span>
+            </label>
+            <input type="text" id="gest-tecnico" name="tecnico" class="form-input" placeholder="Nombre completo del técnico..." disabled>
+            <span id="tecnico-hint" class="input-hint">Obligatorio si el estado es Asignada, En Proceso o Resuelta.</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="gest-observaciones" class="form-label">Observaciones del Cambio</label>
+          <input type="text" id="gest-observaciones" name="observaciones" class="form-input" placeholder="Ej. Asignado para revisión en sitio / Pruebas superadas con éxito..." disabled>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="btn-actualizar-estado" class="btn btn-primary" disabled>
+            Actualizar Estado
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 4. TABLERO GENERAL DE SOLICITUDES REGISTRADAS -->
+    <section id="modulo-listado" class="card-panel mt-6">
+      <div class="panel-header">
+        <div class="panel-header-text">
+          <span class="panel-kicker">Resumen General</span>
+          <h2 class="panel-title">Tablero de Solicitudes Registradas</h2>
+        </div>
+        <button id="btn-recargar-lista" class="btn btn-secondary btn-sm">Actualizar Tablero</button>
+      </div>
+      <p class="panel-description">Listado en tiempo real de todas las órdenes en el repositorio en memoria. Haga clic en cualquier registro para consultarlo instantáneamente.</p>
+
+      <div class="table-container">
+        <table class="data-table" id="tabla-solicitudes">
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Solicitante</th>
+              <th>Categoría</th>
+              <th>Prioridad</th>
+              <th>Estado</th>
+              <th>Técnico</th>
+              <th>Fecha Creación</th>
+              <th class="text-right">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-body">
+            <!-- Filas dinámicas -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <p class="footer-copy">Sistema de Solicitudes TI &copy; 2026. Persistencia estructurada en memoria con auditoría integral.</p>
+      <div class="footer-specs">
+        <span>Node.js v20+</span>
+        <span>·</span>
+        <span>Express REST API</span>
+        <span>·</span>
+        <span>Jest &amp; Supertest Suite</span>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

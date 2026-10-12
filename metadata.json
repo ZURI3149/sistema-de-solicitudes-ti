@@ -1,0 +1,6 @@
+{
+  "name": "Sistema de Solicitudes TI",
+  "description": "Sistema integral de gestión de solicitudes de soporte técnico con registro, asignación, ciclo de vida de estados y auditoría histórica.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
